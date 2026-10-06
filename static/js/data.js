@@ -54,8 +54,8 @@ window.VMPP = (function () {
   // come first, in this order; any other clip in DATA follows in DATA order.
   const ORDER = [
     "1_12620635_2160_3840_60fps",
-    "0_f8229280",
     "5_5274907-uhd_4096_2160_25fps",
+    "0_f8229280",
     "2_12297614_1080_1920_24fps",
     "3_13098362_3840_2160_30fps",
     "2_5928006-uhd_3840_2160_25fps",
