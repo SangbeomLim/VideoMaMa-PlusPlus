@@ -1,10 +1,7 @@
 /* ==========================================================================
    VideoMaMa++ — hero pair: VideoMaMa vs VideoMaMa++
    --------------------------------------------------------------------------
-   Input, VideoMaMa and VideoMaMa++ on one timeline. Underneath, a track marks
-   where VideoMaMa starts a new chunk: it mattes each 6-frame chunk on its own,
-   so the matte can jump at those boundaries. Each mark lights up as playback
-   crosses it; clicking one replays that boundary.
+   Input, VideoMaMa and VideoMaMa++ on one timeline.
    Dependency-free.
    ========================================================================== */
 
@@ -19,14 +16,6 @@
 
   // Resync a follower once it drifts further than this from the master.
   const DRIFT = 0.15;
-
-  // Every clip on the page is encoded at 10 fps, one video frame per input
-  // frame. VideoMaMa ran with non-overlapping 6-frame chunks (--num_frames 6),
-  // so its chunks start at frames 0, 6, 12, ...
-  const SRC_FPS = 10;
-  const CHUNK = 6;
-  // How long a crossed boundary mark stays lit, in ms.
-  const FLASH_MS = 450;
 
   function el(tag, attrs = {}, kids = []) {
     const node = document.createElement(tag);
@@ -47,71 +36,6 @@
     return v;
   }
 
-  /* ---------------------------------------------------------------------- */
-  /* Chunk-boundary track                                                   */
-  /* ---------------------------------------------------------------------- */
-
-  class SeamTrack {
-    /** @param {HTMLElement} track  @param {(frame:number)=>void} onJump */
-    constructor(track, onJump) {
-      this.track = track;
-      this.frames = 0;
-      this.marks = [];
-      this.layer = el("div", { class: "hp-chunks" });
-      this.head = el("div", { class: "hp-head" });
-      track.append(this.layer, this.head);
-      track.addEventListener("click", (e) => {
-        if (!this.frames) return;
-        const mark = e.target.closest(".hp-mark");
-        if (mark) return onJump(Number(mark.dataset.frame) - 2);
-        const r = track.getBoundingClientRect();
-        onJump(Math.floor(((e.clientX - r.left) / r.width) * this.frames));
-      });
-    }
-
-    /** Lay out the chunks of a clip with n frames. */
-    setFrames(n) {
-      if (n === this.frames) return;
-      this.frames = n;
-      this.layer.textContent = "";
-      this.marks = [];
-      const pct = (f) => (f / n) * 100 + "%";
-      for (let k = 0, start = 0; start < n; k++, start += CHUNK) {
-        const len = Math.min(CHUNK, n - start);
-        this.layer.appendChild(el("div", {
-          class: "hp-chunk" + (k % 2 ? " alt" : ""),
-          style: `left:${pct(start)};width:${pct(len)}`,
-        }));
-        if (start > 0) {
-          const mark = el("button", {
-            type: "button",
-            class: "hp-mark",
-            "data-frame": String(start),
-            style: `left:${pct(start)}`,
-            title: `Chunk boundary: frame ${start - 1} → ${start}`,
-            "aria-label": `Jump to the chunk boundary at frame ${start}`,
-          });
-          this.layer.appendChild(mark);
-          this.marks.push(mark);
-        }
-      }
-    }
-
-    setHead(frac) {
-      this.head.style.left = Math.max(0, Math.min(1, frac || 0)) * 100 + "%";
-    }
-
-    /** Highlight the mark at this boundary frame. */
-    hit(frame) {
-      const m = this.marks.find((x) => Number(x.dataset.frame) === frame);
-      if (!m) return;
-      m.classList.add("hit");
-      setTimeout(() => m.classList.remove("hit"), FLASH_MS);
-    }
-  }
-
-  /* ---------------------------------------------------------------------- */
-
   function init() {
     const host = document.getElementById("heroPair");
     if (!host) return;
@@ -123,7 +47,6 @@
     const playBtn = document.getElementById("hpPlay");
     const restartBtn = document.getElementById("hpRestart");
     const seek = document.getElementById("hpSeek");
-    const trackEl = document.getElementById("hpTrack");
 
     // This section's own clip order: the clips listed in data-clip (comma
     // separated) come first, in that order; the rest follow in the shared
@@ -150,36 +73,10 @@
 
     // The input video drives the timeline; the two mattes follow it.
     const master = sides[0].video;
-    const track = new SeamTrack(trackEl, (frame) => jumpTo(frame));
 
     function seekAll(t) {
       for (const s of sides) { try { s.video.currentTime = t; } catch (_) {} }
     }
-    // Jump to a frame (a little past its start, so it is the frame shown) and play.
-    function jumpTo(frame) {
-      const n = track.frames;
-      if (!n) return;
-      const f = Math.max(0, Math.min(n - 1, frame));
-      seekAll((f + 0.05) / SRC_FPS);
-      lastFrame = f;
-      play();
-    }
-
-    // Watch the frame number every animation frame (timeupdate is only ~4 Hz,
-    // too coarse for a boundary every 0.6 s) and light the mark on each crossing.
-    let lastFrame = -1;
-    (function tick() {
-      const d = master.duration;
-      if (Number.isFinite(d) && d > 0) {
-        const f = Math.floor(master.currentTime * SRC_FPS + 1e-3);
-        if (f !== lastFrame) {
-          if (!master.paused && f === lastFrame + 1 && f % CHUNK === 0 && f < track.frames) track.hit(f);
-          lastFrame = f;
-        }
-        track.setHead(master.currentTime / d);
-      }
-      requestAnimationFrame(tick);
-    })();
 
     function paint(paused) {
       playBtn.textContent = paused ? "Play" : "Pause";
@@ -201,7 +98,6 @@
       if (master.videoWidth && master.videoHeight) {
         host.style.setProperty("--ar", (master.videoWidth / master.videoHeight).toFixed(4));
       }
-      if (Number.isFinite(master.duration)) track.setFrames(Math.round(master.duration * SRC_FPS));
     });
     master.addEventListener("play", () => paint(false));
     master.addEventListener("pause", () => paint(true));
@@ -264,15 +160,12 @@
     playBtn.addEventListener("click", () => toggle());
     restartBtn.addEventListener("click", () => {
       seekAll(0);
-      lastFrame = 0;
       play();
     });
     seek.addEventListener("input", () => {
       const d = master.duration;
       if (!Number.isFinite(d)) return;
-      const t = (parseInt(seek.value, 10) / 1000) * d;
-      seekAll(t);
-      lastFrame = Math.floor(t * SRC_FPS + 1e-3);
+      seekAll((parseInt(seek.value, 10) / 1000) * d);
     });
 
     refresh();
