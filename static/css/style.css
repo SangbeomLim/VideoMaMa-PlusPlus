@@ -407,6 +407,20 @@ h3 {
   padding-left: 4px;
 }
 
+/* Big "what to look for" line above the hero players. */
+.hp-callout {
+  max-width: 900px;
+  margin: 0 auto 26px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.7rem);
+  line-height: 1.35;
+  color: var(--text);
+  text-wrap: balance;
+}
+.hp-callout strong { font-weight: 600; }
+.hp-callout strong.ours { color: var(--ours); }
+
 @media (max-width: 720px) {
   .hp-stage { grid-template-columns: 1fr; width: auto; margin: 0; }
 }

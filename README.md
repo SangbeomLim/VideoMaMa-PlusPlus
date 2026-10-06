@@ -18,7 +18,7 @@ project_page/
 │   ├── js/slider.js           ← drag-divider comparison
 │   ├── js/comparison.js       ← all-methods grid + theme toggle
 │   └── images/                ← web versions of the figures (generated)
-├── videos/                    ← 16 clips × (2 inputs + 6 methods × 2 outputs), 98 MB
+├── videos/                    ← 9 clips × (2 inputs + 6 methods × 2 outputs), 52 MB
 └── tools/
     ├── regenerate.py          ← rescan videos/ and rewrite the clip list
     ├── temporal_stats.py      ← optional: frame-to-frame alpha change per clip (analysis only)
@@ -67,7 +67,7 @@ git push -u origin main
 Then in the repo: **Settings → Pages → Source: Deploy from a branch → `main` / `(root)`**.
 The page appears at `https://<USER>.github.io/<REPO>/` within a minute or two.
 
-The 98 MB of video is well under GitHub's 1 GB soft limit for Pages, so the
+The 52 MB of video is well under GitHub's 1 GB soft limit for Pages, so the
 videos can go in the repo as ordinary files — no Git LFS needed.
 
 ## Changing the clips or methods
@@ -94,8 +94,9 @@ python3 tools/regenerate.py
 ```
 
 That rescans `videos/` and rewrites the `DATA` block in `static/js/data.js`.
-A clip folder prefixed with a number (`0_foo`, `3_bar`) sorts to the front, which
-is how you control clip order. If a method is missing for some clip,
+Clip order is set by `ORDER` in `static/js/data.js`, just below that block, and
+is shared by all three viewers, so dot N is the same clip everywhere. Clips not
+listed in `ORDER` follow at the end. If a method is missing for some clip,
 the script emits an availability map and that panel renders "Not available"
 instead of breaking.
 
@@ -105,7 +106,7 @@ methods start visible in the grid, edit `OURS` / `BASELINES` at the top of
 
 ## The two viewers
 
-### 1. Slider comparison — "Ours vs. baselines"
+### 1. Slider comparison — "Comparison vs VideoMaMa (Ours)"
 
 A draggable divider with a baseline on the left and VideoMaMa++ on the right,
 both playing the same clip at the same instant. Step through clips with the
@@ -159,12 +160,3 @@ same clip at the same instant (`static/js/pair.js`).
 `tools/temporal_stats.py` is not used by the page; it measures the mean
 frame-to-frame alpha change per clip (into `static/js/temporal.js`) if you want
 to check which clips show the boundary jumps most clearly.
-
-`data-clip` on `<div id="heroPair">` in `index.html` is a comma-separated list
-of clips shown first, in order (dot 1, dot 2, ...); every other clip follows.
-It currently opens on `5_5274907-uhd_4096_2160_25fps`, then `0_f8229280`,
-`1_12620635_2160_3840_60fps`, `2_12297614_1080_1920_24fps`,
-`3_13098362_3840_2160_30fps`, `2_5928006-uhd_3840_2160_25fps`, and
-`7667636-uhd_2160_3840_30fps` (dot 7). The advantage is not uniform across clips; on a few
-(e.g. `0_f8229280`, `3_13098362_3840_2160_30fps`) the measured peak is larger for
-VideoMaMa++, so check the curve before picking a clip to show.

@@ -48,12 +48,7 @@
     const restartBtn = document.getElementById("hpRestart");
     const seek = document.getElementById("hpSeek");
 
-    // This section's own clip order: the clips listed in data-clip (comma
-    // separated) come first, in that order; the rest follow in the shared
-    // order. Other sections are unaffected.
-    const featured = (host.dataset.clip || "")
-      .split(",").map((c) => c.trim()).filter((c) => V.CLIPS.includes(c));
-    const clips = [...featured, ...V.CLIPS.filter((c) => !featured.includes(c))];
+    const clips = V.CLIPS;
     const state = { idx: 0, kind: "pred_alpha" };
 
     // --- players -----------------------------------------------------------

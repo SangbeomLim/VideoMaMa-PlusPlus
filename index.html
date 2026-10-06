@@ -75,19 +75,19 @@
 <!-- ======================= TEASER: VideoMaMa vs VideoMaMa++ ======================= -->
 <section id="teaser">
   <div class="wrap">
-
-    <p class="caption" style="margin: 0 auto 20px; max-width: 760px; text-align: center;">
+    <p class="caption" style="margin: 0 auto 16px; max-width: 760px; text-align: center;">
       Video diffusion backbones can only process 6–24 frames at a time, so even ordinary videos are
       matted in chunks. When each chunk refines its coarse mask independently, neighbouring chunks
       settle on different refinements — flickering edges and jumps in transparency at every seam.
       <strong>VideoMaMa++ hands each chunk the matte the previous one already produced</strong>, so the
       result carries across the seam. Same footage, same instant, both models below.
     </p>
+    <p class="hp-callout">
+      Watch the edges: <strong>VideoMaMa</strong> flickers as each new chunk starts over, while
+      <strong class="ours">VideoMaMa++</strong> stays temporally consistent.
+    </p>
 
-    <!-- data-clip: comma-separated clips shown first, in this order (dot 1, dot 2, ...);
-         every other clip follows. -->
-    <div id="heroPair" class="hp-stage"
-         data-clip="5_5274907-uhd_4096_2160_25fps,0_f8229280,1_12620635_2160_3840_60fps,2_12297614_1080_1920_24fps,3_13098362_3840_2160_30fps,2_5928006-uhd_3840_2160_25fps,7667636-uhd_2160_3840_30fps"></div>
+    <div id="heroPair" class="hp-stage"></div>
 
     <div class="sc-controls" style="margin-top: 22px;">
       <div class="ctl">
@@ -223,7 +223,7 @@
 <!-- ======================= SLIDER COMPARISON ======================= -->
 <section id="slider" class="slider-section">
   <div class="wrap">
-    <h2>Ours vs. baselines</h2>
+    <h2>Comparison vs VideoMaMa (Ours)</h2>
     <p class="caption" style="margin-bottom: 24px;">
       Drag the divider to sweep between a baseline (left) and VideoMaMa++ (right)
       on the same frame, at the same instant. Pick any clip, any baseline, and
@@ -238,8 +238,8 @@
       <div class="ctl">
         <span>Output</span>
         <div class="seg" id="scKind">
-          <button type="button" data-kind="pred_greenscreen" class="on">Greenscreen</button>
           <button type="button" data-kind="pred_alpha">Alpha matte</button>
+          <button type="button" data-kind="pred_greenscreen" class="on">Greenscreen</button>
         </div>
       </div>
     </div>
@@ -273,7 +273,7 @@
   <div class="wrap">
     <h2>All methods side by side</h2>
     <p class="caption" style="margin-bottom: 22px;">
-      10 in-the-wild clips, six methods, all players synchronized to the same timeline.
+      9 in-the-wild clips, six methods, all players synchronized to the same timeline.
       Toggle methods on and off to compare any subset side by side.
     </p>
 

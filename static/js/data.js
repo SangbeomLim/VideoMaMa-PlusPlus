@@ -1,7 +1,7 @@
 /* ==========================================================================
    VideoMaMa++ — shared clip/method inventory
    --------------------------------------------------------------------------
-   Consumed by slider.js and comparison.js. Regenerate the CLIPS list with
+   Consumed by pair.js, slider.js and comparison.js. Regenerate the CLIPS list with
    `python3 tools/regenerate.py` after adding or removing clips.
 
    On-disk layout:
@@ -44,14 +44,30 @@ window.VMPP = (function () {
       "5_5274907-uhd_4096_2160_25fps",
       "12106373-uhd_2160_3840_60fps",
       "2794235-hd_1920_1080_24fps",
-      "7132293-uhd_4096_2160_30fps",
       "7667636-uhd_2160_3840_30fps"
     ],
     "availability": null
   };
   /* ---- end generated block ---- */
 
-  const CLIPS = DATA.clips;
+  // Clip order shared by every viewer (dot 1, dot 2, ...). Clips listed here
+  // come first, in this order; any other clip in DATA follows in DATA order.
+  const ORDER = [
+    "1_12620635_2160_3840_60fps",
+    "0_f8229280",
+    "5_5274907-uhd_4096_2160_25fps",
+    "2_12297614_1080_1920_24fps",
+    "3_13098362_3840_2160_30fps",
+    "2_5928006-uhd_3840_2160_25fps",
+    "7667636-uhd_2160_3840_30fps",
+    "12106373-uhd_2160_3840_60fps",
+    "2794235-hd_1920_1080_24fps",
+  ];
+
+  const CLIPS = [
+    ...ORDER.filter((c) => DATA.clips.includes(c)),
+    ...DATA.clips.filter((c) => !ORDER.includes(c)),
+  ];
 
   // Encode each segment so method folders containing "+" resolve on any host.
   const vpath = (...segs) => [VIDEO_ROOT, ...segs].map(encodeURIComponent).join("/");
